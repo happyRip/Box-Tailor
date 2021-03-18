@@ -32,7 +32,7 @@ type Product struct {
 	Size   dimensions
 }
 
-func (p Product) GetDimensions(sizeZ float32) error {
+func (p *Product) GetDimensions(sizeZ float32) error {
 	if p.Source.Name == "" {
 		return errors.New("product source path not specified")
 	} else if p.Source.Extention != ".plt" {
@@ -46,29 +46,27 @@ func (p Product) GetDimensions(sizeZ float32) error {
 	}
 
 	ext := extremes{
-		min: point{x: math.MaxFloat32, y: math.MaxFloat32},
-		max: point{x: -math.MaxFloat32, y: -math.MaxFloat32},
+		min: Point{x: math.MaxFloat32, y: math.MaxFloat32},
+		max: Point{x: -math.MaxFloat32, y: -math.MaxFloat32},
 	}
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if line[0] == 'P' {
-			if line[1] == 'D' {
-				for i, v := range getNumbers(line) {
-					f, err := strconv.ParseFloat(v, 32)
-					if err != nil {
-						file.Close()
-						return err
-					}
+		if line[0] == 'P' && line[1] == 'D' {
+			for i, v := range getNumbers(line) {
+				f, err := strconv.ParseFloat(v, 32)
+				if err != nil {
+					file.Close()
+					return err
+				}
 
-					if i%2 == 0 {
-						ext.min.x = min(ext.min.x, float32(f))
-						ext.max.x = max(ext.max.x, float32(f))
-					} else {
-						ext.min.y = min(ext.min.y, float32(f))
-						ext.max.y = max(ext.max.y, float32(f))
-					}
+				if i%2 == 0 {
+					ext.min.x = min(ext.min.x, float32(f))
+					ext.max.x = max(ext.max.x, float32(f))
+				} else {
+					ext.min.y = min(ext.min.y, float32(f))
+					ext.max.y = max(ext.max.y, float32(f))
 				}
 			}
 		}
@@ -85,4 +83,21 @@ func (p Product) GetDimensions(sizeZ float32) error {
 		return err
 	}
 	return nil
+}
+
+type Box struct {
+	Content  Product
+	AddSpace Point
+	Size     Point
+	Type     rune
+}
+
+func (b *Box) DrawBox(f *os.File, origin Point, boxType rune) {
+
+	switch boxType {
+	case 'm':
+
+	case 'f':
+
+	}
 }

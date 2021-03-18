@@ -2,7 +2,7 @@ package tailor
 
 import "regexp"
 
-type point struct {
+type Point struct {
 	x, y float32
 }
 
