@@ -10,13 +10,13 @@ import (
 )
 
 type File struct {
-	Name, Directory, Extention string
+	Name, Directory, Extension string
 }
 
 func (f *File) Initialize(path string) {
-	f.Extention = filepath.Ext(path)
+	f.Extension = filepath.Ext(path)
 	f.Name = filepath.Base(path)
-	f.Name = f.Name[0 : len(f.Name)-len(f.Extention)] // remove extension from file name
+	f.Name = f.Name[0 : len(f.Name)-len(f.Extension)] // remove extension from file name
 	f.Directory = filepath.Dir(path)
 	if f.Directory == "." || f.Directory == "/" {
 		f.Directory = "./"
@@ -35,8 +35,8 @@ type Product struct {
 func (p *Product) GetDimensions(sizeZ float32) error {
 	if p.Source.Name == "" {
 		return errors.New("product source path not specified")
-	} else if p.Source.Extention != ".plt" {
-		return errors.New("file extention is incorrect")
+	} else if p.Source.Extension != ".plt" {
+		return errors.New("file extension is incorrect")
 	}
 
 	file, err := os.Open(p.Source.Directory)
