@@ -7,7 +7,7 @@ type Point struct {
 }
 
 type extremes struct {
-	min, max point
+	min, max Point
 }
 
 func min(a, b float32) float32 {

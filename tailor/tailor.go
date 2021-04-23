@@ -36,7 +36,7 @@ func (p *Product) GetDimensions(sizeZ float32) error {
 	if p.Source.Name == "" {
 		return errors.New("product source path not specified")
 	} else if p.Source.Extention != ".plt" {
-		return errors.New("file extension is incorrect")
+		return errors.New("file extention is incorrect")
 	}
 
 	file, err := os.Open(p.Source.Directory)
