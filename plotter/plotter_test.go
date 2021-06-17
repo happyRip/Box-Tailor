@@ -3,10 +3,11 @@ package plotter
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"testing"
 	"time"
 
-	u "./utility"
+	u "github.com/happyRip/Box-Tailor/src/plotter/utility"
 )
 
 func TestConstructCommand(t *testing.T) {
@@ -17,7 +18,11 @@ func TestConstructCommand(t *testing.T) {
 		rand.Float64()*float64(rand.Intn(150)),
 		rand.Float64()*float64(rand.Intn(150))
 
-	want := fmt.Sprintf("%s:%s,%s;\n", command, x*u.UNIT, y*u.UNIT)
+	want := fmt.Sprintf("%s:%s,%s;\n",
+		command,
+		strconv.FormatFloat(x*u.UNIT, 'f', -1, 64),
+		strconv.FormatFloat(y*u.UNIT, 'f', -1, 64),
+	)
 	got := ConstructCommand(command, x, y)
 
 	if got != want {

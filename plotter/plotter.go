@@ -1,7 +1,7 @@
 package plotter
 
 import (
-	u "./utility"
+	u "github.com/happyRip/Box-Tailor/src/plotter/utility"
 )
 
 type pen struct {
