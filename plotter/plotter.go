@@ -1,6 +1,9 @@
 package plotter
 
 import (
+	"math"
+	"strconv"
+
 	u "github.com/happyRip/Box-Tailor/plotter/utility"
 )
 
@@ -41,7 +44,8 @@ func SelectPen(i int) string {
 func ConstructCommand(command string, args ...float64) string {
 	command += ":"
 	for i, f := range args {
-		command += u.ToStringSingleDecimal(f)
+		r := math.Round(f)
+		command += strconv.FormatFloat(r, 'f', -1, 64)
 		if i < len(args)-1 {
 			command += ","
 		}
