@@ -16,3 +16,6 @@
 
 # old stuff
 .old
+
+# test -coverprofile output
+*.out
