@@ -1,3 +1,3 @@
-module github.com/happyRip/Box-Tailor
+module box-tailor
 
 go 1.16
