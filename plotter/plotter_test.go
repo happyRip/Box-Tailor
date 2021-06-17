@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	u "github.com/happyRip/Box-Tailor/src/plotter/utility"
+	u "github.com/happyRip/Box-Tailor/plotter/utility"
 )
 
 func TestConstructCommand(t *testing.T) {
