@@ -11,7 +11,7 @@ type pen struct {
 	X, Y int // current position
 }
 
-func GetPen() pen {
+func NewPen() pen {
 	return pen{}
 }
 
