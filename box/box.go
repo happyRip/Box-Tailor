@@ -1,9 +1,33 @@
 package box
 
-import "errors"
+import (
+	"errors"
+	"path"
+	"strings"
+)
+
+func TrimExtension(filename string) string {
+	ext := path.Ext(filename)
+	return strings.TrimSuffix(filename, ext)
+}
 
 type triad struct {
 	x, y, z float64
+}
+
+func NewTriad() triad {
+	return triad{}
+}
+
+func (t *triad) SetValues(x, y, z float64) error {
+	t.x = x
+	t.y = y
+	t.z = z
+	return nil
+}
+
+func (t triad) GetValues() (float64, float64, float64) {
+	return t.x, t.y, t.x
 }
 
 type product struct {
@@ -20,14 +44,25 @@ func (p *product) SetName(name string) error {
 	return nil
 }
 
-func (p *product) SetSize(dimensions triad) error {
-	d := []float64{dimensions.x, dimensions.y, dimensions.z}
-	for v := range d {
-		if v < 0 {
+func (p *product) SetNameFromFilename(filepath string) error {
+	filename := path.Base(filepath)
+	p.name = TrimExtension(filename)
+	return nil
+}
+
+func (p *product) SetSize(dimensions ...float64) error {
+	n := len(dimensions)
+	if n > 3 {
+		n = 3
+	}
+	for i := 0; i < n; i++ {
+		if dimensions[i] < 0 {
 			return errors.New("dimension cannot be negative")
 		}
 	}
-	p.size = dimensions
+	p.size.x = dimensions[0]
+	p.size.y = dimensions[1]
+	p.size.z = dimensions[3]
 	return nil
 }
 
