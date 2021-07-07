@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+type Draft interface {
+	Draw() string
+	CalculateDimensions() (float64, float64)
+}
+
 func TrimExtension(filename string) string {
 	ext := path.Ext(filename)
 	return strings.TrimSuffix(filename, ext)
@@ -38,6 +43,8 @@ type product struct {
 func NewProduct() product {
 	return product{}
 }
+
+// Setters
 
 func (p *product) SetName(name string) error {
 	p.name = name

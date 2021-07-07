@@ -42,6 +42,17 @@ func (p *pen) Line(x, y float64) string {
 	return ConstructCommand("PD", x, y)
 }
 
+func (p *pen) DrawRectangle(width, height float64) string {
+	var rect string
+	for i := 0; i < 2; i++ {
+		rect += p.Line(width, 0)
+		rect += p.Line(0, height)
+		width *= -1
+		height *= -1
+	}
+	return rect
+}
+
 func SelectPen(i int) string {
 	return ConstructCommand("SP", float64(i))
 }
