@@ -10,12 +10,22 @@ func TrimExtension(filename string) string {
 	return strings.TrimSuffix(filename, ext)
 }
 
-func NotPositive(f float64) bool {
-	return f <= 0
+func AnyNotPositive(args ...float64) bool {
+	for _, v := range args {
+		if v <= 0 {
+			return true
+		}
+	}
+	return false
 }
 
-func LessThanZero(f float64) bool {
-	return f < 0
+func AnyLessThanZero(args ...float64) bool {
+	for _, v := range args {
+		if v < 0 {
+			return true
+		}
+	}
+	return false
 }
 
 type Triad struct {

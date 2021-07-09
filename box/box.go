@@ -33,17 +33,11 @@ func (p *product) SetNameFromFilename(filepath string) error {
 	return nil
 }
 
-func (p *product) SetSize(dimensions ...float64) error {
-	n := len(dimensions)
-	if n > 3 {
-		n = 3
+func (p *product) SetSize(x, y, z float64) error {
+	if u.AnyNotPositive(x, y, z) {
+		return errors.New("dimensions cannot be negative")
 	}
-	for i := 0; i < n; i++ {
-		if dimensions[i] < 0 {
-			return errors.New("dimension cannot be negative")
-		}
-	}
-	p.size.SetValues(dimensions[0], dimensions[1], dimensions[2])
+	p.size.SetValues(x, y, z)
 	return nil
 }
 
@@ -70,7 +64,7 @@ type board struct {
 }
 
 func (b *board) SetSize(x, y float64) error {
-	if u.NotPositive(x) || u.NotPositive(y) {
+	if u.AnyNotPositive(x, y) {
 		return errors.New("dimension not positive")
 	}
 	b.size.SetValues(x, y)
@@ -78,7 +72,7 @@ func (b *board) SetSize(x, y float64) error {
 }
 
 func (b *board) SetMargin(x, y float64) error {
-	if u.LessThanZero(x) || u.LessThanZero(y) {
+	if u.AnyLessThanZero(x, y) {
 		return errors.New("dimension less than zero")
 	}
 	b.margin.SetValues(x, y)
