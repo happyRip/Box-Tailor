@@ -3,48 +3,24 @@ package box
 import (
 	"errors"
 	"path"
-	"strings"
+
+	u "github.com/happyRip/Box-Tailor/box/utility"
 )
 
 type Draft interface {
 	Draw() string
-	CalculateDimensions() (float64, float64)
-}
-
-func TrimExtension(filename string) string {
-	ext := path.Ext(filename)
-	return strings.TrimSuffix(filename, ext)
-}
-
-type triad struct {
-	x, y, z float64
-}
-
-func NewTriad() triad {
-	return triad{}
-}
-
-func (t *triad) SetValues(x, y, z float64) error {
-	t.x = x
-	t.y = y
-	t.z = z
-	return nil
-}
-
-func (t triad) GetValues() (float64, float64, float64) {
-	return t.x, t.y, t.x
+	CalculateSize() (float64, float64)
 }
 
 type product struct {
-	name string
-	size triad
+	name       string
+	size       u.Triad
+	boxVariant string
 }
 
 func NewProduct() product {
 	return product{}
 }
-
-// Setters
 
 func (p *product) SetName(name string) error {
 	p.name = name
@@ -53,7 +29,7 @@ func (p *product) SetName(name string) error {
 
 func (p *product) SetNameFromFilename(filepath string) error {
 	filename := path.Base(filepath)
-	p.name = TrimExtension(filename)
+	p.name = u.TrimExtension(filename)
 	return nil
 }
 
@@ -67,16 +43,72 @@ func (p *product) SetSize(dimensions ...float64) error {
 			return errors.New("dimension cannot be negative")
 		}
 	}
-	p.size.x = dimensions[0]
-	p.size.y = dimensions[1]
-	p.size.z = dimensions[3]
+	p.size.SetValues(dimensions[0], dimensions[1], dimensions[2])
 	return nil
 }
 
-func (p product) GetName() string {
-	return p.name
+func (p *product) SetVariant(variant string) error {
+	p.boxVariant = variant
+	return nil
 }
 
-func (p product) GetSize() triad {
-	return p.size
+func (p product) GetName() (string, error) {
+	return p.name, nil
+}
+
+func (p product) GetSize() (u.Triad, error) {
+	return p.size, nil
+}
+
+func (p product) GetVariant() (string, error) {
+	return p.boxVariant, nil
+}
+
+type board struct {
+	size   u.Pair
+	margin u.Pair
+}
+
+func (b *board) SetSize(x, y float64) error {
+	if u.NotPositive(x) || u.NotPositive(y) {
+		return errors.New("dimension not positive")
+	}
+	b.size.SetValues(x, y)
+	return nil
+}
+
+func (b *board) SetMargin(x, y float64) error {
+	if u.LessThanZero(x) || u.LessThanZero(y) {
+		return errors.New("dimension less than zero")
+	}
+	b.margin.SetValues(x, y)
+	return nil
+}
+
+func (b board) GetSize() (float64, float64, error) {
+	return b.size.GetValues()
+}
+
+func (b board) GetMargin() (float64, float64, error) {
+	return b.margin.GetValues()
+}
+
+type sortingAlgorithm interface {
+	sort() error
+	getSorted() ([][]product, error)
+}
+
+type rackParams struct {
+	width, height float64
+	margin        u.Pair
+}
+
+type shelf struct {
+	toSort         []product
+	sortedRacks    [][]product
+	rackParameters rackParams
+}
+
+func (s *shelf) ShelfPack() ([]product, error) {
+	return nil, nil
 }
