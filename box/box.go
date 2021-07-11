@@ -22,6 +22,16 @@ func NewProduct() product {
 	return product{}
 }
 
+// TODO
+func (p product) Draw() string {
+	return ""
+}
+
+// TODO
+func (p *product) CalculateSize() (float64, float64) {
+	return 0, 0
+}
+
 func (p *product) SetName(name string) error {
 	p.name = name
 	return nil
@@ -88,8 +98,8 @@ func (b board) GetMargin() (float64, float64, error) {
 }
 
 type sortingAlgorithm interface {
-	sort() error
-	getSorted() ([][]product, error)
+	Sort() error
+	GetSorted() ([][]product, error)
 }
 
 type rackParams struct {
@@ -103,6 +113,7 @@ type shelf struct {
 	rackParameters rackParams
 }
 
+// TODO
 func (s *shelf) ShelfPack() ([]product, error) {
 	return nil, nil
 }
