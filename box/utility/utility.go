@@ -42,7 +42,19 @@ func (t *Triad) SetValues(x, y, z float64) error {
 }
 
 func (t Triad) GetValues() (float64, float64, float64, error) {
-	return t.x, t.y, t.x, nil
+	return t.x, t.y, t.z, nil
+}
+
+func (t Triad) X() float64 {
+	return t.x
+}
+
+func (t Triad) Y() float64 {
+	return t.y
+}
+
+func (t Triad) Z() float64 {
+	return t.z
 }
 
 func (t Triad) X() float64 {

@@ -19,3 +19,6 @@
 
 # test -coverprofile output
 *.out
+
+# other
+*.plt
