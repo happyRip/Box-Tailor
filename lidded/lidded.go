@@ -1,6 +1,8 @@
 package lidded
 
 import (
+	"fmt"
+
 	u "github.com/happyRip/Box-Tailor/box/utility"
 	"github.com/happyRip/Box-Tailor/plotter"
 )
@@ -32,6 +34,28 @@ func (p *product) SetSize(width, depth, height float64) error {
 		return err
 	}
 	return nil
+}
+
+func (p *product) ProcessUserInput() {
+	var (
+		name    string
+		x, y, z float64
+		size    u.Triad
+	)
+
+	fmt.Print("Name: ")
+	fmt.Scanln(&name)
+	fmt.Print("Dimensions\n    width: ")
+	fmt.Scan(&x)
+	fmt.Print("    depth: ")
+	fmt.Scan(&y)
+	fmt.Print("   height: ")
+	fmt.Scan(&z)
+
+	size.SetValues(x, y, z)
+
+	p.name = name
+	p.size = size
 }
 
 func (p product) Name() string {
