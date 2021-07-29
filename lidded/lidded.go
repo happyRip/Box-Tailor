@@ -43,13 +43,13 @@ func (p *product) ProcessUserInput() {
 		size    u.Triad
 	)
 
-	fmt.Print("Name: ")
+	fmt.Print("Podaj nazwę pliku wyjściowego: ")
 	fmt.Scanln(&name)
-	fmt.Print("Dimensions\n    width: ")
+	fmt.Print("Podaj wymiary zawartości pudełka:\n    szerokość (x): ")
 	fmt.Scan(&x)
-	fmt.Print("    depth: ")
+	fmt.Print("    głębokość (y): ")
 	fmt.Scan(&y)
-	fmt.Print("   height: ")
+	fmt.Print("     wysokość (z): ")
 	fmt.Scan(&z)
 
 	size.SetValues(x, y, z)
@@ -85,29 +85,69 @@ type box struct {
 	boardThickness float64
 }
 
+func NewBox(content product, buffer u.Triad, variant string, boardThickness float64) box {
+	var b box
+	b.SetContent(content)
+	b.SetBuffer(buffer.X(), buffer.Y(), buffer.Z())
+	b.SetVariant(variant)
+	b.SetBoardThickness(boardThickness)
+	return b
+}
+
+func NewEmptyBox() box {
+	return box{}
+}
+
 func (b box) Draw() string {
 	var out string
-
 	x, y, z, _ := b.InternalSize()
-	// thk := b.BoardThickness()
+	thk := b.BoardThickness()
 	pen := plotter.NewPen()
-
+	out += plotter.SelectPen(1)
 	for i := 0; i < 2; i++ {
-		yHeight := /* 2*thk + */ x + y
+		yHeight := 2*thk + x + y
 		xFlap := 0.9 * z
 		xCover := 0.9 * y
-		out += pen.MoveRelative(0, -yHeight)
-		out += pen.MoveRelative(xFlap, 0)
-		out += pen.MoveRelative(y-xFlap, 0.5*y)
-		out += pen.MoveRelative(-0.05*y, -0.5*y)
-		out += pen.MoveRelative(xCover, 0)
-		out += pen.MoveRelative(0.05*y, 0.5*y)
-		out += pen.MoveRelative(-(y - xFlap), -0.5*y)
-		out += pen.MoveRelative(xFlap, 0)
+		out += pen.Line(0, -yHeight)
+		out += pen.Line(xFlap, 0)
+		out += pen.Line(z-xFlap, 0.5*(y+thk))
+		out += pen.Line(thk, 0)
+		out += pen.Line(0.05*y, -0.5*(y+thk))
+		out += pen.Line(xCover, 0)
+		out += pen.Line(0.05*y, 0.5*(y+thk))
+		out += pen.Line(thk, 0)
+		out += pen.Line(z-xFlap, -0.5*(y+thk))
+		out += pen.Line(xFlap, 0)
 		x, y, z = -x, -y, -z
+		thk = -thk
 	}
 
+	out += plotter.SelectPen(2)
+	out += pen.MoveAbsolute(0, -(0.5 * (y + thk)))
+	out += pen.Line(2*z+y+2*thk, 0)
+	out += pen.MoveAbsolute(0, -(1.5*thk + x + 0.5*y))
+	out += pen.Line(2*z+y+2*thk, 0)
+	out += pen.MoveAbsolute(z+0.5*thk, -(0.5 * (y + thk)))
+	out += pen.Line(0, -(x + thk))
+	out += pen.MoveAbsolute(z+y+1.5*thk, -(0.5 * (y + thk)))
+	out += pen.Line(0, -(x + thk))
 	return out
+}
+
+func (b *box) SetContent(content product) {
+	b.content = content
+}
+
+func (b *box) SetBuffer(x, y, z float64) {
+	b.buffer.SetValues(x, y, z)
+}
+
+func (b *box) SetVariant(variant string) {
+	b.variant = variant
+}
+
+func (b *box) SetBoardThickness(thickness float64) {
+	b.boardThickness = thickness
 }
 
 func (b box) Name() string {
