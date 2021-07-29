@@ -9,11 +9,14 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/happyRip/Box-Tailor/box/utility"
 	u "github.com/happyRip/Box-Tailor/plotter/utility"
 )
 
+const unit = 40 // 40 points per mm
+
 type pen struct {
-	X, Y int // current position
+	x, y int // current position
 }
 
 func NewPen() pen {
@@ -21,25 +24,29 @@ func NewPen() pen {
 }
 
 func (p *pen) MoveAbsolute(x, y float64) string {
-	p.X = u.FloatToIntTimesTen(x)
-	p.Y = u.FloatToIntTimesTen(y)
-	return ConstructCommand("PU", x, y)
+	p.SetX(x)
+	p.SetY(y)
+	return ConstructCommand(
+		"PU",
+		p.X(),
+		p.Y(),
+	)
 }
 
 func (p *pen) MoveRelative(x, y float64) string {
-	p.X += u.FloatToIntTimesTen(x)
-	p.Y += u.FloatToIntTimesTen(y)
+	p.AddToX(x)
+	p.AddToY(y)
 	return ConstructCommand(
 		"PU",
-		u.IntSingleDecimalToFloat(p.X),
-		u.IntSingleDecimalToFloat(p.Y),
+		p.X(),
+		p.Y(),
 	)
 }
 
 func (p *pen) Line(x, y float64) string {
-	p.X = u.FloatToIntTimesTen(x)
-	p.Y = u.FloatToIntTimesTen(y)
-	return ConstructCommand("PD", x, y)
+	p.AddToX(x)
+	p.AddToY(y)
+	return ConstructCommand("PD", p.X(), p.Y())
 }
 
 func (p *pen) DrawRectangle(width, height float64) string {
@@ -53,12 +60,35 @@ func (p *pen) DrawRectangle(width, height float64) string {
 	return rect
 }
 
+func (p *pen) SetX(f float64) {
+	p.x = u.FloatToIntTimesTen(f)
+}
+
+func (p *pen) AddToX(f float64) {
+	p.x += u.FloatToIntTimesTen(f)
+}
+
+func (p *pen) SetY(f float64) {
+	p.y = u.FloatToIntTimesTen(f)
+}
+
+func (p *pen) AddToY(f float64) {
+	p.y += u.FloatToIntTimesTen(f)
+}
+
+func (p pen) X() float64 {
+	return u.IntSingleDecimalToFloat(p.x) * unit
+}
+
+func (p pen) Y() float64 {
+	return u.IntSingleDecimalToFloat(p.y) * unit
+}
+
 func SelectPen(i int) string {
 	return ConstructCommand("SP", float64(i))
 }
 
 func ConstructCommand(command string, args ...float64) string {
-	command += ":"
 	for i, f := range args {
 		r := math.Round(f)
 		command += strconv.FormatFloat(r, 'f', -1, 64)
@@ -123,6 +153,87 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 		return empty, err
 	}
 	return dimensions, nil
+}
+
+type pltFile struct {
+	name, path string
+	file       *os.File
+	content    string
+}
+
+func NewPltFile(name, path, content string) (pltFile, error) {
+	var p pltFile
+	p.SetName(name)
+	p.SetPath(path)
+	p.SetContent(content)
+	ext := ".plt"
+
+	var err error
+	p.file, err = os.Create(p.path + p.name + ext)
+	if err != nil {
+		return pltFile{}, err
+	}
+	return p, nil
+}
+
+func NewEmptyPltFile() pltFile {
+	return pltFile{}
+}
+
+func (p pltFile) Close() error {
+	err := p.file.Close()
+	return err
+}
+
+func (p pltFile) Initialize() error {
+	_, err := p.file.WriteString("IN;\nLT;\n")
+	return err
+}
+
+func (p pltFile) WriteString(s string) error {
+	_, err := p.file.WriteString(s)
+	return err
+}
+
+func (p pltFile) WriteContent() error {
+	_, err := p.file.WriteString(p.content)
+	return err
+}
+
+func (p *pltFile) SetName(name string) {
+	p.name = utility.TrimExtension(name)
+}
+
+func (p *pltFile) SetPath(path string) {
+	p.path = path
+}
+
+func (p *pltFile) SetContent(content string) {
+	p.content = content
+}
+
+func (p *pltFile) AppendContent(content string) {
+	p.content += content
+}
+
+func (p *pltFile) EmptyContent() {
+	p.content = ""
+}
+
+func (p pltFile) Name() string {
+	return p.name
+}
+
+func (p pltFile) Path() string {
+	return p.path
+}
+
+func (p pltFile) Content() string {
+	return p.content
+}
+
+func (p pltFile) File() *os.File {
+	return p.file
 }
 
 func getNumbers(s string) []string {

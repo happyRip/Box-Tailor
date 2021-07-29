@@ -32,7 +32,13 @@ type Triad struct {
 	x, y, z float64
 }
 
-func NewTriad() Triad {
+func NewTriad(x, y, z float64) Triad {
+	var t Triad
+	t.SetValues(x, y, z)
+	return t
+}
+
+func NewEmptyTriad() Triad {
 	return Triad{}
 }
 
