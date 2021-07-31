@@ -2,6 +2,7 @@ package lidded
 
 import (
 	"fmt"
+	"strings"
 
 	u "github.com/happyRip/Box-Tailor/box/utility"
 	"github.com/happyRip/Box-Tailor/plotter"
@@ -103,34 +104,46 @@ func (b box) Draw() string {
 	x, y, z, _ := b.InternalSize()
 	thk := b.BoardThickness()
 	pen := plotter.NewPen()
-	out += plotter.SelectPen(1)
 	for i := 0; i < 2; i++ {
 		yHeight := 2*thk + x + y
 		xFlap := 0.9 * z
 		xCover := 0.9 * y
-		out += pen.Line(0, -yHeight)
-		out += pen.Line(xFlap, 0)
-		out += pen.Line(z-xFlap, 0.5*(y+thk))
-		out += pen.Line(thk, 0)
-		out += pen.Line(0.05*y, -0.5*(y+thk))
-		out += pen.Line(xCover, 0)
-		out += pen.Line(0.05*y, 0.5*(y+thk))
-		out += pen.Line(thk, 0)
-		out += pen.Line(z-xFlap, -0.5*(y+thk))
-		out += pen.Line(xFlap, 0)
+		out += strings.Join(
+			[]string{
+				plotter.SelectPen(1),
+				pen.LineShape(
+					[][2]float64{
+						{0, -yHeight},
+						{xFlap, 0},
+						{z - xFlap, 0.5 * (y + thk)},
+						{thk, 0},
+						{0.05 * y, -0.5 * (y + thk)},
+						{xCover, 0},
+						{0.05 * y, 0.5 * (y + thk)},
+						{thk, 0},
+						{z - xFlap, -0.5 * (y + thk)},
+						{xFlap, 0},
+					}...,
+				)},
+			"",
+		)
 		x, y, z = -x, -y, -z
 		thk = -thk
 	}
 
-	out += plotter.SelectPen(2)
-	out += pen.MoveAbsolute(0, -(0.5 * (y + thk)))
-	out += pen.Line(2*z+y+2*thk, 0)
-	out += pen.MoveAbsolute(0, -(1.5*thk + x + 0.5*y))
-	out += pen.Line(2*z+y+2*thk, 0)
-	out += pen.MoveAbsolute(z+0.5*thk, -(0.5 * (y + thk)))
-	out += pen.Line(0, -(x + thk))
-	out += pen.MoveAbsolute(z+y+1.5*thk, -(0.5 * (y + thk)))
-	out += pen.Line(0, -(x + thk))
+	out += strings.Join(
+		[]string{
+			plotter.SelectPen(2),
+			pen.MoveAbsolute(0, -(0.5 * (y + thk))),
+			pen.Line(2*z+y+2*thk, 0),
+			pen.MoveAbsolute(0, -(1.5*thk + x + 0.5*y)),
+			pen.Line(2*z+y+2*thk, 0),
+			pen.MoveAbsolute(z+0.5*thk, -(0.5 * (y + thk))),
+			pen.Line(0, -(x + thk)),
+			pen.MoveAbsolute(z+y+1.5*thk, -(0.5 * (y + thk))),
+			pen.Line(0, -(x + thk))},
+		"",
+	)
 	return out
 }
 
