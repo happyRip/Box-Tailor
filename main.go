@@ -20,10 +20,9 @@ func main() {
 	}
 	outputFile.Initialize()
 
-	buffer := utility.NewTriad(0, 0, 0)
 	box := lidded.NewBox(
 		p,
-		buffer,
+		utility.NewTriad(0, 0, 0),
 		"",
 		5,
 	)
