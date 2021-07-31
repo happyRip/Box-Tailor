@@ -57,6 +57,9 @@ func (p *product) ProcessUserInput() {
 
 	p.name = name
 	p.size = size
+
+	fmt.Println(p.Name())
+	fmt.Println(p.Size())
 }
 
 func (p product) Name() string {
@@ -82,15 +85,13 @@ func (p product) Height() float64 {
 type box struct {
 	content        product
 	buffer         u.Triad
-	variant        string
 	boardThickness float64
 }
 
-func NewBox(content product, buffer u.Triad, variant string, boardThickness float64) box {
+func NewBox(content product, buffer u.Triad, boardThickness float64) box {
 	var b box
 	b.SetContent(content)
 	b.SetBuffer(buffer.X(), buffer.Y(), buffer.Z())
-	b.SetVariant(variant)
 	b.SetBoardThickness(boardThickness)
 	return b
 }
@@ -104,13 +105,15 @@ func (b box) Draw() string {
 	x, y, z, _ := b.InternalSize()
 	thk := b.BoardThickness()
 	pen := plotter.NewPen()
+
+	// draw outer box shape
+	out += plotter.SelectPen(1)
 	for i := 0; i < 2; i++ {
 		yHeight := 2*thk + x + y
 		xFlap := 0.9 * z
 		xCover := 0.9 * y
 		out += strings.Join(
 			[]string{
-				plotter.SelectPen(1),
 				pen.LineShape(
 					[][2]float64{
 						{0, -yHeight},
@@ -131,6 +134,7 @@ func (b box) Draw() string {
 		thk = -thk
 	}
 
+	// draw fold lines
 	out += strings.Join(
 		[]string{
 			plotter.SelectPen(2),
@@ -153,10 +157,6 @@ func (b *box) SetContent(content product) {
 
 func (b *box) SetBuffer(x, y, z float64) {
 	b.buffer.SetValues(x, y, z)
-}
-
-func (b *box) SetVariant(variant string) {
-	b.variant = variant
 }
 
 func (b *box) SetBoardThickness(thickness float64) {
@@ -187,10 +187,6 @@ func (b box) InternalSize() (float64, float64, float64, error) {
 	}
 
 	return x + m, y + n, z + o, nil
-}
-
-func (b box) Variant() string {
-	return b.variant
 }
 
 func (b box) BoardThickness() float64 {
