@@ -49,6 +49,15 @@ func (p *pen) Line(x, y float64) string {
 	return ConstructCommand("PD", p.X(), p.Y())
 }
 
+func (p *pen) LineShape(points ...[2]float64) string {
+	var out string
+	for _, point := range points {
+		x, y := point[0], point[1]
+		out += p.Line(x, y)
+	}
+	return out
+}
+
 func (p *pen) DrawRectangle(width, height float64) string {
 	var rect string
 	for i := 0; i < 2; i++ {
