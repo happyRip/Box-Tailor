@@ -23,7 +23,6 @@ func main() {
 	box := lidded.NewBox(
 		p,
 		utility.NewTriad(0, 0, 0),
-		"",
 		5,
 	)
 
