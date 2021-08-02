@@ -2,125 +2,114 @@ package box
 
 import (
 	"errors"
+	"fmt"
 	"path"
 	"sort"
 
+	"github.com/happyRip/Box-Tailor/box/utility"
 	u "github.com/happyRip/Box-Tailor/box/utility"
 )
 
-type Draft interface {
+type Drafter interface {
 	Draw() string
 	CalculateSize() (float64, float64)
 }
 
-type product struct {
-	name       string
-	size       u.Triad
-	boxVariant string
-}
-
-func NewProduct() product {
-	return product{}
+type Product struct {
+	Name       string
+	Size       u.Triad
+	BoxVariant string
 }
 
 // TODO
-func (p product) Draw() string {
+func (p Product) Draw() string {
 	return ""
 }
 
 // TODO
-func (p product) CalculateSize() (float64, float64) {
+func (p Product) CalculateSize() (float64, float64) {
 	return 0, 0
 }
 
-func (p *product) SetName(name string) error {
-	p.name = name
-	return nil
+// lidded main
+func (p *Product) ProcessUserInput() {
+	var name string
+	fmt.Print("Podaj nazwę pliku wyjściowego: ")
+	fmt.Scanln(&name)
+	fmt.Print("Podaj wymiary zawartości pudełka:\n    szerokość (x) [mm]: ")
+
+	var x, y, z float64
+	fmt.Scan(&x)
+	fmt.Print("    głębokość (y) [mm]: ")
+	fmt.Scan(&y)
+	fmt.Print("     wysokość (z) [mm]: ")
+	fmt.Scan(&z)
+
+	var size utility.Triad
+	size.SetValues(x, y, z)
+
+	p.Name = name
+	p.Size = size
 }
 
-func (p *product) SetNameFromFilepath(filepath string) error {
+func (p *Product) SetNameFromFilepath(filepath string) error {
 	filename := path.Base(filepath)
-	p.name = u.TrimExtension(filename)
+	p.Name = u.TrimExtension(filename)
 	return nil
 }
 
-func (p *product) SetSize(x, y, z float64) error {
+func (p *Product) SetSize(x, y, z float64) error {
 	if u.AnyNotPositive(x, y, z) {
 		return errors.New("dimensions cannot be negative")
 	}
-	p.size.SetValues(x, y, z)
+	p.Size.SetValues(x, y, z)
 	return nil
 }
 
-func (p *product) SetVariant(variant string) error {
-	p.boxVariant = variant
-	return nil
-}
-
-func (p product) Name() string {
-	return p.name
-}
-
-func (p product) Size() (u.Triad, error) {
-	return p.size, nil
-}
-
-func (p product) SizeX() float64 {
-	x, _, _, _ := p.size.GetValues()
+func (p Product) SizeX() float64 {
+	x := p.Size.X
 	return x
 }
 
-func (p product) SizeY() float64 {
-	_, y, _, _ := p.size.GetValues()
+func (p Product) SizeY() float64 {
+	y := p.Size.Y
 	return y
 }
 
-func (p product) SizeZ() float64 {
-	_, _, z, _ := p.size.GetValues()
+func (p Product) SizeZ() float64 {
+	z := p.Size.Z
 	return z
 }
 
-func (p product) BoxVariant() string {
-	return p.boxVariant
+type Board struct {
+	Size   u.Pair
+	Margin u.Pair
 }
 
-type board struct {
-	size   u.Pair
-	margin u.Pair
-}
-
-func (b *board) SetSize(x, y float64) error {
+func (b *Board) SetSize(x, y float64) error {
 	if u.AnyNotPositive(x, y) {
 		return errors.New("dimension not positive")
 	}
-	b.size.SetValues(x, y)
+	b.Size.SetValues(x, y)
 	return nil
 }
 
-func (b *board) SetMargin(x, y float64) error {
+func (b *Board) SetMargin(x, y float64) error {
 	if u.AnyLessThanZero(x, y) {
 		return errors.New("dimension less than zero")
 	}
-	b.margin.SetValues(x, y)
+	b.Margin.SetValues(x, y)
 	return nil
 }
 
-func (b board) Size() (float64, float64, error) {
-	return b.size.GetValues()
-}
-
-func (b board) SizeX() float64 {
-	x, _, _ := b.size.GetValues()
+func (b Board) SizeX() float64 {
+	x := b.Size.X
 	return x
 }
 
-func (b board) SizeY() float64 {
-	_, y, _ := b.size.GetValues()
+func (b Board) SizeY() float64 {
+	y := b.Size.Y
 	return y
-}
-
-func (b board) Margin() (float64, float64, error) {
-	return b.margin.GetValues()
 }
 
 type shelfParams struct {
@@ -159,8 +148,8 @@ func (s shelfParams) Margin() (u.Pair, error) {
 }
 
 type rack struct {
-	productList     []product
-	shelfList       [][]product
+	productList     []Product
+	shelfList       [][]Product
 	shelfParameters shelfParams
 }
 
@@ -178,7 +167,7 @@ func (r *rack) ShelfPack() error {
 
 	products := r.productList
 	var (
-		shelf   []product
+		shelf   []Product
 		currPos float64
 	)
 	for len(products) > 0 {
@@ -186,7 +175,7 @@ func (r *rack) ShelfPack() error {
 
 		if i == -1 {
 			r.AppendShelf(shelf...)
-			shelf = []product{}
+			shelf = []Product{}
 			currPos = 0
 			i = 0
 		}
@@ -202,7 +191,7 @@ func (r *rack) ShelfPack() error {
 	return nil
 }
 
-func (r *rack) AppendShelf(products ...product) {
+func (r *rack) AppendShelf(products ...Product) {
 	r.shelfList = append(r.shelfList, products)
 }
 
@@ -214,7 +203,7 @@ func (r rack) Height() float64 {
 	return r.shelfParameters.Height()
 }
 
-func RemoveFromProductSlice(i int, products ...product) []product {
+func RemoveFromProductSlice(i int, products ...Product) []Product {
 	if i >= len(products)-1 {
 		return products[:i]
 	}
@@ -222,6 +211,6 @@ func RemoveFromProductSlice(i int, products ...product) []product {
 }
 
 // TODO
-func LessOrEqual(axis rune, value float64, args ...product) int {
+func LessOrEqual(axis rune, value float64, args ...Product) int {
 	return 0
 }

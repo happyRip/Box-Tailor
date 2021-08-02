@@ -24,7 +24,7 @@ func TestProduct(t *testing.T) {
 			name, got, name,
 		)
 	}
-	size := u.NewTriad()
+	size := u.Triad{}
 	size.SetValues(x, y, z)
 	if got, _ := p.Size(); got != size {
 		t.Errorf("input: (%f, %f, %f)\ngot: %v\nwant: %v\n",
