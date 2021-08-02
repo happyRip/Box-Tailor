@@ -15,15 +15,11 @@ import (
 
 const unit = 40 // 40 points per mm
 
-type pen struct {
+type Pen struct {
 	x, y int // current position
 }
 
-func NewPen() pen {
-	return pen{}
-}
-
-func (p *pen) MoveAbsolute(x, y float64) string {
+func (p *Pen) MoveAbsolute(x, y float64) string {
 	p.SetX(x)
 	p.SetY(y)
 	return ConstructCommand(
@@ -33,7 +29,7 @@ func (p *pen) MoveAbsolute(x, y float64) string {
 	)
 }
 
-func (p *pen) MoveRelative(x, y float64) string {
+func (p *Pen) MoveRelative(x, y float64) string {
 	p.AddToX(x)
 	p.AddToY(y)
 	return ConstructCommand(
@@ -43,22 +39,22 @@ func (p *pen) MoveRelative(x, y float64) string {
 	)
 }
 
-func (p *pen) Line(x, y float64) string {
+func (p *Pen) Line(x, y float64) string {
 	p.AddToX(x)
 	p.AddToY(y)
 	return ConstructCommand("PD", p.X(), p.Y())
 }
 
-func (p *pen) LineShape(points ...[2]float64) string {
-	var out string
+func (p *Pen) LineShape(points ...[2]float64) []string {
+	var out []string
 	for _, point := range points {
 		x, y := point[0], point[1]
-		out += p.Line(x, y)
+		out = append(out, p.Line(x, y))
 	}
 	return out
 }
 
-func (p *pen) DrawRectangle(width, height float64) string {
+func (p *Pen) DrawRectangle(width, height float64) string {
 	var rect string
 	for i := 0; i < 2; i++ {
 		rect += p.Line(width, 0)
@@ -69,27 +65,27 @@ func (p *pen) DrawRectangle(width, height float64) string {
 	return rect
 }
 
-func (p *pen) SetX(f float64) {
+func (p *Pen) SetX(f float64) {
 	p.x = u.FloatToIntTimesTen(f)
 }
 
-func (p *pen) AddToX(f float64) {
+func (p *Pen) AddToX(f float64) {
 	p.x += u.FloatToIntTimesTen(f)
 }
 
-func (p *pen) SetY(f float64) {
+func (p *Pen) SetY(f float64) {
 	p.y = u.FloatToIntTimesTen(f)
 }
 
-func (p *pen) AddToY(f float64) {
+func (p *Pen) AddToY(f float64) {
 	p.y += u.FloatToIntTimesTen(f)
 }
 
-func (p pen) X() float64 {
+func (p Pen) X() float64 {
 	return u.IntSingleDecimalToFloat(p.x) * unit
 }
 
-func (p pen) Y() float64 {
+func (p Pen) Y() float64 {
 	return u.IntSingleDecimalToFloat(p.y) * unit
 }
 
