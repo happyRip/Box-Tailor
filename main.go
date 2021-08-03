@@ -15,7 +15,7 @@ func main() {
 	p := box.Product{}
 	p.ProcessUserInput()
 
-	outputFile, err := plotter.NewPltFile(p.Name, "", "2\n1\n0\n")
+	outputFile, err := plotter.NewPltFile(p.Name, "", "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,7 +32,7 @@ func main() {
 		outputFile.WriteString(s)
 	}
 
-	o, err := filepath.Abs(outputFile.Path() + outputFile.Name() + ".plt")
+	o, err := filepath.Abs(outputFile.Pointer.Name())
 	if err != nil {
 		log.Fatal(err)
 	}
