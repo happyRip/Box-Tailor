@@ -11,7 +11,7 @@ import (
 )
 
 type Drafter interface {
-	Draw() string
+	Draw() []string
 	CalculateSize() (float64, float64)
 }
 

@@ -63,6 +63,10 @@ func (b Box) Draw() []string {
 	return out
 }
 
+func (b Box) CalculateSize() (float64, float64) {
+	return 0, 0
+}
+
 func (b *Box) SetBuffer(x, y, z float64) {
 	b.Margin.SetValues(x, y, z)
 }

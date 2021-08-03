@@ -21,13 +21,14 @@ func main() {
 	}
 	outputFile.Initialize()
 
-	box := lidded.Box{
+	var draft box.Drafter
+	draft = lidded.Box{
 		Content:        p,
 		Margin:         utility.Triad{},
 		BoardThickness: 5,
 	}
 
-	for _, s := range box.Draw() {
+	for _, s := range draft.Draw() {
 		outputFile.WriteString(s)
 	}
 
