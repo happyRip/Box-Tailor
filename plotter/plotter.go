@@ -6,7 +6,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 
 	"github.com/happyRip/Box-Tailor/box/utility"
@@ -121,15 +120,14 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 		return empty, err
 	}
 
-	x, y := extremes{}, extremes{}
-	x.init()
-	y.init()
+	x := u.NewExtremes()
+	y := u.NewExtremes()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line[:2] == "PD" {
-			stringSlice := getNumbers(scanner.Text())
+			stringSlice := u.GetNumbers(scanner.Text())
 
 			for i, v := range stringSlice {
 				v, err := strconv.Atoi(v)
@@ -139,9 +137,9 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 
 				switch i % 2 {
 				case 0:
-					x.getExtremes(v)
+					x.GetExtremes(v)
 				case 1:
-					y.getExtremes(v)
+					y.GetExtremes(v)
 				}
 
 			}
@@ -149,8 +147,8 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 	}
 
 	dimensions := floatPair{
-		x: float64(x.max-x.min) / u.UNIT,
-		y: float64(y.max-y.min) / u.UNIT,
+		x: float64(x.Max()-x.Min()) / u.UNIT,
+		y: float64(y.Max()-y.Min()) / u.UNIT,
 	}
 
 	err = file.Close()
@@ -162,7 +160,7 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 
 type pltFile struct {
 	name, path string
-	file       *os.File
+	Pointer    *os.File
 	content    string
 }
 
@@ -174,7 +172,7 @@ func NewPltFile(name, path, content string) (pltFile, error) {
 	ext := ".plt"
 
 	var err error
-	p.file, err = os.Create(p.path + p.name + ext)
+	p.Pointer, err = os.Create(p.path + p.name + ext)
 	if err != nil {
 		return pltFile{}, err
 	}
@@ -186,22 +184,22 @@ func NewEmptyPltFile() pltFile {
 }
 
 func (p pltFile) Close() error {
-	err := p.file.Close()
+	err := p.Pointer.Close()
 	return err
 }
 
 func (p pltFile) Initialize() error {
-	_, err := p.file.WriteString("IN;\nLT;\n")
+	_, err := p.Pointer.WriteString("IN;\nLT;\n")
 	return err
 }
 
 func (p pltFile) WriteString(s string) error {
-	_, err := p.file.WriteString(s)
+	_, err := p.Pointer.WriteString(s)
 	return err
 }
 
 func (p pltFile) WriteContent() error {
-	_, err := p.file.WriteString(p.content)
+	_, err := p.Pointer.WriteString(p.content)
 	return err
 }
 
@@ -235,38 +233,4 @@ func (p pltFile) Path() string {
 
 func (p pltFile) Content() string {
 	return p.content
-}
-
-func (p pltFile) File() *os.File {
-	return p.file
-}
-
-func getNumbers(s string) []string {
-	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
-	return re.FindAllString(s, -1)
-}
-
-type extremes struct {
-	min, max int
-}
-
-func (e *extremes) init() {
-	e.min, e.max = math.MaxInt64, math.MinInt64
-}
-
-func (e *extremes) getExtremes(i int) {
-	e.setMin(i)
-	e.setMax(i)
-}
-
-func (e *extremes) setMin(i int) {
-	if e.min > i {
-		e.min = i
-	}
-}
-
-func (e *extremes) setMax(i int) {
-	if e.max < i {
-		e.max = i
-	}
 }

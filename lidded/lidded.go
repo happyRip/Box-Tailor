@@ -6,10 +6,6 @@ import (
 	"github.com/happyRip/Box-Tailor/plotter"
 )
 
-type Drafter interface {
-	Draw() string
-}
-
 type Box struct {
 	Content        box.Product
 	Margin         utility.Triad
@@ -17,13 +13,12 @@ type Box struct {
 }
 
 func (b Box) Draw() []string {
-	var out []string
 	x, y, z := b.InternalSize()
 	thk := b.BoardThickness
 	pen := plotter.Pen{}
 
 	// draw outer box shape
-	out = append(out, plotter.SelectPen(1))
+	out := []string{plotter.SelectPen(1)}
 	for i := 0; i < 2; i++ {
 		yHeight := 2*thk + x + y
 		xFlap := 0.9 * z
