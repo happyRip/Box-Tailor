@@ -22,7 +22,7 @@ func main() {
 	outputFile.Initialize()
 
 	var draft box.Drafter
-	draft = lidded.Box{
+	draft = lidded.Lid{
 		Content:        p,
 		Margin:         utility.Triad{},
 		BoardThickness: 5,
