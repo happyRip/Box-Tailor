@@ -15,27 +15,24 @@ type Box struct {
 func (b Box) Draw() []string {
 	x, y, z := b.InternalSize()
 	thk := b.BoardThickness
-	pen := plotter.Pen{}
+	var pen plotter.Pen
 
-	// draw outer box shape
+	// draw cut lines
 	out := []string{plotter.SelectPen(1)}
 	for i := 0; i < 2; i++ {
-		yHeight := 2*thk + x + y
-		xFlap := 0.9 * z
-		xCover := 0.9 * y
 		out = append(out,
 			pen.LineShape(
 				[][2]float64{
-					{0, -yHeight},
-					{xFlap, 0},
-					{z - xFlap, 0.5 * (y + thk)},
-					{thk, 0},
-					{0.05 * y, -0.5 * (y + thk)},
-					{xCover, 0},
-					{0.05 * y, 0.5 * (y + thk)},
-					{thk, 0},
-					{z - xFlap, -0.5 * (y + thk)},
-					{xFlap, 0},
+					{0, -(2*(thk+z) + y)},
+					{z, 0},
+					{0, z + thk},
+					{0.5 * thk, 0},
+					{0, -(z + thk)},
+					{x + thk, 0},
+					{0, z + thk},
+					{0.5 * thk, 0},
+					{0, -(z + thk)},
+					{z, 0},
 				}...,
 			)...,
 		)
@@ -43,18 +40,21 @@ func (b Box) Draw() []string {
 		thk = -thk
 	}
 
-	// draw fold lines
+	//draw fold lines
 	out = append(out,
 		plotter.SelectPen(2),
-		pen.MoveAbsolute(0, -(0.5*(y+thk))),
-		pen.Line(2*z+y+2*thk, 0),
-		pen.MoveAbsolute(0, -(1.5*thk+x+0.5*y)),
-		pen.Line(2*z+y+2*thk, 0),
-		pen.MoveAbsolute(z+0.5*thk, -(0.5*(y+thk))),
-		pen.Line(0, -(x+thk)),
-		pen.MoveAbsolute(z+y+1.5*thk, -(0.5*(y+thk))),
-		pen.Line(0, -(x+thk)),
+		pen.MoveRelative(z+0.5*thk, -(z+0.5*thk)),
+		pen.DrawRectangle(x+thk, -(y+thk)),
+		pen.MoveAbsolute(0, -(z+thk)),
+		pen.Line(z, 0),
+		pen.MoveRelative(-z, -y),
+		pen.Line(z, 0),
+		pen.MoveRelative(2*thk+x, 0),
+		pen.Line(z, 0),
+		pen.MoveRelative(-z, y),
+		pen.Line(z, 0),
 	)
+
 	return out
 }
 

@@ -15,7 +15,7 @@ type Lid struct {
 func (l Lid) Draw() []string {
 	x, y, z := l.InternalSize()
 	thk := l.BoardThickness
-	tabHeight := 1.1 * l.BoardThickness
+	tabHeight := 1.1 * thk
 	pen := plotter.Pen{}
 
 	// draw cut lines
@@ -57,7 +57,7 @@ func (l Lid) Draw() []string {
 			pen.LineShape(
 				[][2]float64{
 					{0, -(2*z + 2.5*thk)},
-					{0.5 * thk, 0},
+					{thk, 0},
 					{0, 0.5 * (x - thk)},
 					{z, 0},
 					{0, -0.5 * (x - thk)},
@@ -87,7 +87,7 @@ func (l Lid) Draw() []string {
 					{0, -0.5 * (x - thk)},
 					{-z, 0},
 					{0, 0.5 * (x - thk)},
-					{-0.5 * thk, 0},
+					{-thk, 0},
 				}...,
 			)...,
 		)
@@ -97,33 +97,45 @@ func (l Lid) Draw() []string {
 		tabHeight *= -1
 	}
 
-	out = append(out, plotter.SelectPen(2),
+	// draw fold lines
+	out = append(out,
+		plotter.SelectPen(2),
 		pen.MoveAbsolute(
-			tabHeight+z+2*thk,
-			-(tabHeight+2*z+2.5*thk),
+			tabHeight+z+1.5*thk,
+			-(tabHeight+2*z+2*thk),
 		),
-		pen.Line(2*z+thk+x, 0),
-		pen.MoveRelative(0.5*thk, 0),
+		// pen.Line(2*z+thk+x, 0),
+		pen.Line(z, 0),
+		pen.MoveRelative(thk, 0),
+		pen.Line(x, 0),
+		pen.MoveRelative(thk, 0),
+		pen.Line(z, 0),
+		pen.MoveRelative(0.5*thk, -0.5*thk),
 		pen.Line(0, -y),
 		pen.MoveRelative(thk, 0),
 		pen.Line(0, y),
-		pen.MoveRelative(-(2*thk+z), z+thk),
+		pen.MoveRelative(-(2.5*thk+z), z+thk),
 		pen.Line(-x, 0),
 		pen.MoveRelative(0, thk),
 		pen.Line(x, 0),
-		pen.MoveRelative(0.5*thk+z, -(2*thk+z+y)),
-		pen.Line(-(2*z+thk+x), 0),
-		pen.MoveRelative(-0.5*thk, 0),
+		pen.MoveRelative(thk+z, -(2.5*thk+z+y)),
+		// pen.Line(-(2*z+thk+x), 0),
+		pen.Line(-z, 0),
+		pen.MoveRelative(-thk, 0),
+		pen.Line(-x, 0),
+		pen.MoveRelative(-thk, 0),
+		pen.Line(-z, 0),
+		pen.MoveRelative(-0.5*thk, 0.5*thk),
 		pen.Line(0, y),
 		pen.MoveRelative(-thk, 0),
 		pen.Line(0, -y),
-		pen.MoveRelative(2*thk+z, -(thk+z)),
+		pen.MoveRelative(2.5*thk+z, -(thk+z)),
 		pen.Line(x, 0),
 		pen.MoveRelative(0, -thk),
 		pen.Line(-x, 0),
-		pen.MoveRelative(-0.25*thk, 2*thk+z),
+		pen.MoveRelative(-0.5*thk, 2*thk+z),
 		pen.Line(0, y),
-		pen.MoveRelative(0.5*thk+x, 0),
+		pen.MoveRelative(thk+x, 0),
 		pen.Line(0, -y),
 	)
 
