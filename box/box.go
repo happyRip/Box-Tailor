@@ -46,6 +46,9 @@ func (p *Product) ProcessUserInput() {
 	fmt.Scan(&z)
 
 	var size utility.Triad
+	if x < y {
+		x, y = y, x
+	}
 	size.SetValues(x, y, z)
 
 	p.Name = name

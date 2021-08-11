@@ -11,63 +11,68 @@ import (
 	"github.com/happyRip/Box-Tailor/plotter"
 )
 
-const THK = 6
+const (
+	BOARD_THICKNESS = 6
+	BOTTOM_BOX_STR  = "_0" // denko
+	TOP_BOX_STR     = "_1" // wieczko
+)
 
 func main() {
 	p := box.Product{}
 	p.ProcessUserInput()
 
-	outputFile, err := plotter.NewPltFile(p.Name+"_0", "", "")
+	var outAbs []string
+	o, err := drawBox(
+		p.Name+BOTTOM_BOX_STR,
+		lidded.Box{
+			Content:        p,
+			BoardThickness: BOARD_THICKNESS,
+		})
 	if err != nil {
 		log.Fatal(err)
 	}
-	outputFile.Initialize()
+	outAbs = append(outAbs, o)
 
-	var draft box.Drafter
-	draft = lidded.Box{
-		Content:        p,
-		Margin:         utility.Triad{},
-		BoardThickness: THK,
+	o, err = drawBox(
+		p.Name+TOP_BOX_STR,
+		lidded.Box{
+			Content: box.Product{
+				Size: utility.Triad{
+					X: p.Size.X + 2*(BOARD_THICKNESS+1),
+					Y: p.Size.Y + 2*(BOARD_THICKNESS+1),
+					Z: p.Size.Z,
+				},
+			},
+			BoardThickness: BOARD_THICKNESS,
+		},
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
+	outAbs = append(outAbs, o)
+
+	fmt.Println("Pliki zapisano pod ścieżką:")
+	for _, s := range outAbs {
+		fmt.Println(s)
+	}
+}
+
+func drawBox(name string, draft box.Drafter) (string, error) {
+	outputFile, err := plotter.NewPltFile(name, "", "")
+	if err != nil {
+		return "", err
+	}
+	outputFile.Initialize()
 
 	for _, s := range draft.Draw() {
 		outputFile.WriteString(s)
 	}
 
-	o, err := filepath.Abs(outputFile.Pointer.Name())
+	outputAbs, err := filepath.Abs(outputFile.Pointer.Name())
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	err = outputFile.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	outputFile2, err := plotter.NewPltFile(p.Name+"_1", "", "")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	p.Size = utility.Triad{
-		X: p.Size.X + 2*(THK+1),
-		Y: p.Size.Y + 2*(THK+1),
-		Z: p.Size.Z,
-	}
-	draft = lidded.Box{
-		Content:        p,
-		Margin:         utility.Triad{},
-		BoardThickness: THK,
-	}
-	for _, s := range draft.Draw() {
-		outputFile2.WriteString(s)
-	}
-	o2, err := filepath.Abs(outputFile2.Pointer.Name())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Plik zapisano pod ścieżką:")
-	fmt.Println(o)
-	fmt.Println(o2)
+	return outputAbs, err
 }
