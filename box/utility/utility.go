@@ -41,6 +41,18 @@ func (t Triad) GetValues() (float64, float64, float64) {
 	return t.X, t.Y, t.Z
 }
 
+func (t Triad) X() float64 {
+	return t.x
+}
+
+func (t Triad) Y() float64 {
+	return t.y
+}
+
+func (t Triad) Z() float64 {
+	return t.z
+}
+
 type Pair struct {
 	X, Y float64
 }
