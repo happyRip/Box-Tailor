@@ -6,43 +6,54 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 
+	"github.com/happyRip/Box-Tailor/box/utility"
 	u "github.com/happyRip/Box-Tailor/plotter/utility"
 )
 
-type pen struct {
-	X, Y int // current position
+const unit = 40 // 40 points per mm
+
+type Pen struct {
+	x, y int // current position
 }
 
-func NewPen() pen {
-	return pen{}
-}
-
-func (p *pen) MoveAbsolute(x, y float64) string {
-	p.X = u.FloatToIntTimesTen(x)
-	p.Y = u.FloatToIntTimesTen(y)
-	return ConstructCommand("PU", x, y)
-}
-
-func (p *pen) MoveRelative(x, y float64) string {
-	p.X += u.FloatToIntTimesTen(x)
-	p.Y += u.FloatToIntTimesTen(y)
+func (p *Pen) MoveAbsolute(x, y float64) string {
+	p.SetX(x)
+	p.SetY(y)
 	return ConstructCommand(
 		"PU",
-		u.IntSingleDecimalToFloat(p.X),
-		u.IntSingleDecimalToFloat(p.Y),
+		p.X(),
+		p.Y(),
 	)
 }
 
-func (p *pen) Line(x, y float64) string {
-	p.X = u.FloatToIntTimesTen(x)
-	p.Y = u.FloatToIntTimesTen(y)
-	return ConstructCommand("PD", x, y)
+func (p *Pen) MoveRelative(x, y float64) string {
+	p.AddToX(x)
+	p.AddToY(y)
+	return ConstructCommand(
+		"PU",
+		p.X(),
+		p.Y(),
+	)
 }
 
-func (p *pen) DrawRectangle(width, height float64) string {
+func (p *Pen) Line(x, y float64) string {
+	p.AddToX(x)
+	p.AddToY(y)
+	return ConstructCommand("PD", p.X(), p.Y())
+}
+
+func (p *Pen) LineShape(points ...[2]float64) []string {
+	var out []string
+	for _, point := range points {
+		x, y := point[0], point[1]
+		out = append(out, p.Line(x, y))
+	}
+	return out
+}
+
+func (p *Pen) DrawRectangle(width, height float64) string {
 	var rect string
 	for i := 0; i < 2; i++ {
 		rect += p.Line(width, 0)
@@ -53,12 +64,35 @@ func (p *pen) DrawRectangle(width, height float64) string {
 	return rect
 }
 
+func (p *Pen) SetX(f float64) {
+	p.x = u.FloatToIntTimesTen(f)
+}
+
+func (p *Pen) AddToX(f float64) {
+	p.x += u.FloatToIntTimesTen(f)
+}
+
+func (p *Pen) SetY(f float64) {
+	p.y = u.FloatToIntTimesTen(f)
+}
+
+func (p *Pen) AddToY(f float64) {
+	p.y += u.FloatToIntTimesTen(f)
+}
+
+func (p Pen) X() float64 {
+	return u.IntSingleDecimalToFloat(p.x) * unit
+}
+
+func (p Pen) Y() float64 {
+	return u.IntSingleDecimalToFloat(p.y) * unit
+}
+
 func SelectPen(i int) string {
 	return ConstructCommand("SP", float64(i))
 }
 
 func ConstructCommand(command string, args ...float64) string {
-	command += ":"
 	for i, f := range args {
 		r := math.Round(f)
 		command += strconv.FormatFloat(r, 'f', -1, 64)
@@ -86,16 +120,14 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 		return empty, err
 	}
 
-	x, y := extremes{}, extremes{}
-	x.init()
-	y.init()
+	x := u.NewExtremes()
+	y := u.NewExtremes()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line[:2] == "PD" {
-			stringSlice := getNumbers(scanner.Text())
-
+			stringSlice := u.GetNumbers(scanner.Text())
 			for i, v := range stringSlice {
 				v, err := strconv.Atoi(v)
 				if err != nil {
@@ -104,9 +136,9 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 
 				switch i % 2 {
 				case 0:
-					x.getExtremes(v)
+					x.GetExtremes(v)
 				case 1:
-					y.getExtremes(v)
+					y.GetExtremes(v)
 				}
 
 			}
@@ -114,8 +146,8 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 	}
 
 	dimensions := floatPair{
-		x: float64(x.max-x.min) / u.UNIT,
-		y: float64(y.max-y.min) / u.UNIT,
+		x: float64(x.Max()-x.Min()) / u.UNIT,
+		y: float64(y.Max()-y.Min()) / u.UNIT,
 	}
 
 	err = file.Close()
@@ -125,32 +157,79 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 	return dimensions, nil
 }
 
-func getNumbers(s string) []string {
-	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
-	return re.FindAllString(s, -1)
+type pltFile struct {
+	name, path string
+	Pointer    *os.File
+	content    string
 }
 
-type extremes struct {
-	min, max int
-}
+func NewPltFile(name, path, content string) (pltFile, error) {
+	var p pltFile
+	p.SetName(name)
+	p.SetPath(path)
+	p.SetContent(content)
+	ext := ".plt"
 
-func (e *extremes) init() {
-	e.min, e.max = math.MaxInt64, math.MinInt64
-}
-
-func (e *extremes) getExtremes(i int) {
-	e.setMin(i)
-	e.setMax(i)
-}
-
-func (e *extremes) setMin(i int) {
-	if e.min > i {
-		e.min = i
+	var err error
+	p.Pointer, err = os.Create(p.path + p.name + ext)
+	if err != nil {
+		return pltFile{}, err
 	}
+	return p, nil
 }
 
-func (e *extremes) setMax(i int) {
-	if e.max < i {
-		e.max = i
-	}
+func NewEmptyPltFile() pltFile {
+	return pltFile{}
+}
+
+func (p pltFile) Close() error {
+	err := p.Pointer.Close()
+	return err
+}
+
+func (p pltFile) Initialize() error {
+	_, err := p.Pointer.WriteString("IN;\nLT;\n")
+	return err
+}
+
+func (p pltFile) WriteString(s string) error {
+	_, err := p.Pointer.WriteString(s)
+	return err
+}
+
+func (p pltFile) WriteContent() error {
+	_, err := p.Pointer.WriteString(p.content)
+	return err
+}
+
+func (p *pltFile) SetName(name string) {
+	p.name = utility.TrimExtension(name)
+}
+
+func (p *pltFile) SetPath(path string) {
+	p.path = path
+}
+
+func (p *pltFile) SetContent(content string) {
+	p.content = content
+}
+
+func (p *pltFile) AppendContent(content string) {
+	p.content += content
+}
+
+func (p *pltFile) EmptyContent() {
+	p.content = ""
+}
+
+func (p pltFile) Name() string {
+	return p.name
+}
+
+func (p pltFile) Path() string {
+	return p.path
+}
+
+func (p pltFile) Content() string {
+	return p.content
 }

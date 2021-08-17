@@ -29,20 +29,16 @@ func AnyLessThanZero(args ...float64) bool {
 }
 
 type Triad struct {
-	x, y, z float64
-}
-
-func NewTriad() Triad {
-	return Triad{}
+	X, Y, Z float64
 }
 
 func (t *Triad) SetValues(x, y, z float64) error {
-	t.x, t.y, t.z = x, y, 0
+	t.X, t.Y, t.Z = x, y, z
 	return nil
 }
 
-func (t Triad) GetValues() (float64, float64, float64, error) {
-	return t.x, t.y, t.x, nil
+func (t Triad) GetValues() (float64, float64, float64) {
+	return t.X, t.Y, t.Z
 }
 
 func (t Triad) X() float64 {
@@ -58,14 +54,14 @@ func (t Triad) Z() float64 {
 }
 
 type Pair struct {
-	x, y float64
+	X, Y float64
 }
 
 func (p *Pair) SetValues(x, y float64) error {
-	p.x, p.y = x, y
+	p.X, p.Y = x, y
 	return nil
 }
 
-func (p Pair) GetValues() (float64, float64, error) {
-	return p.x, p.y, nil
+func (p Pair) GetValues() (float64, float64) {
+	return p.X, p.Y
 }
