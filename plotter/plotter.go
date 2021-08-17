@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-
-	u "github.com/happyRip/Box-Tailor/plotter/utility"
 )
 
 type pen struct {
@@ -123,34 +121,4 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 		return empty, err
 	}
 	return dimensions, nil
-}
-
-func getNumbers(s string) []string {
-	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
-	return re.FindAllString(s, -1)
-}
-
-type extremes struct {
-	min, max int
-}
-
-func (e *extremes) init() {
-	e.min, e.max = math.MaxInt64, math.MinInt64
-}
-
-func (e *extremes) getExtremes(i int) {
-	e.setMin(i)
-	e.setMax(i)
-}
-
-func (e *extremes) setMin(i int) {
-	if e.min > i {
-		e.min = i
-	}
-}
-
-func (e *extremes) setMax(i int) {
-	if e.max < i {
-		e.max = i
-	}
 }
