@@ -2,11 +2,9 @@ package box
 
 import (
 	"errors"
-	"fmt"
 	"path"
 	"sort"
 
-	"github.com/happyRip/Box-Tailor/box/utility"
 	u "github.com/happyRip/Box-Tailor/box/utility"
 )
 
@@ -19,30 +17,6 @@ type Product struct {
 	Name       string
 	Size       u.Triad
 	BoxVariant string
-}
-
-// lidded main
-func (p *Product) ProcessUserInput() {
-	var name string
-	fmt.Print("Podaj nazwę pliku wyjściowego: ")
-	fmt.Scanln(&name)
-	fmt.Print("Podaj wymiary zawartości pudełka:\n      długość (x) [mm]: ")
-
-	var x, y, z float64
-	fmt.Scan(&x)
-	fmt.Print("    szerokość (y) [mm]: ")
-	fmt.Scan(&y)
-	fmt.Print("     wysokość (z) [mm]: ")
-	fmt.Scan(&z)
-
-	var size utility.Triad
-	if x > y {
-		x, y = y, x
-	}
-	size.SetValues(x, y, z)
-
-	p.Name = name
-	p.Size = size
 }
 
 func (p *Product) SetNameFromFilepath(filepath string) error {
