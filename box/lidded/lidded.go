@@ -9,6 +9,7 @@ import (
 type Box struct {
 	Content        box.Product
 	Margin         utility.Triad
+	Origin         utility.Pair
 	BoardThickness float64
 }
 
@@ -19,6 +20,9 @@ func (b Box) Draw() []string {
 
 	// draw cut lines
 	out := []string{plotter.SelectPen(1)}
+	if b.Origin.X != 0 || b.Origin.Y != 0 {
+		out = append(out, pen.MoveAbsolute(b.Origin.X, b.Origin.Y))
+	}
 	for i := 0; i < 2; i++ {
 		out = append(out,
 			pen.LineShape(
@@ -45,7 +49,7 @@ func (b Box) Draw() []string {
 		plotter.SelectPen(2),
 		pen.MoveRelative(z+0.5*thk, -(z+0.5*thk)),
 		pen.DrawRectangle(x+thk, -(y+thk)),
-		pen.MoveAbsolute(0, -(z+thk)),
+		pen.MoveAbsolute(b.Origin.X, -(z+thk)),
 		pen.Line(z, 0),
 		pen.MoveRelative(-z, -y),
 		pen.Line(z, 0),
@@ -59,7 +63,9 @@ func (b Box) Draw() []string {
 }
 
 func (b Box) CalculateSize() (float64, float64) {
-	return 0, 0
+	x, y, z := b.InternalSize()
+	thk := b.BoardThickness
+	return 2*(z+thk) + x, 2*(z+thk) + y
 }
 
 func (b *Box) SetBuffer(x, y, z float64) {

@@ -27,7 +27,7 @@ func ToStringUnits(i int) string {
 }
 
 func GetNumbers(s string) []string {
-	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
+	re := regexp.MustCompile(`[-]?\d[\d]*[\.]?[\d{2}]*`)
 	return re.FindAllString(s, -1)
 }
 

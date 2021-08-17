@@ -128,7 +128,6 @@ func GetDimensionsFromFile(source string) (floatPair, error) {
 		line := scanner.Text()
 		if line[:2] == "PD" {
 			stringSlice := u.GetNumbers(scanner.Text())
-
 			for i, v := range stringSlice {
 				v, err := strconv.Atoi(v)
 				if err != nil {

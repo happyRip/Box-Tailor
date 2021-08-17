@@ -21,16 +21,6 @@ type Product struct {
 	BoxVariant string
 }
 
-// TODO
-func (p Product) Draw() string {
-	return ""
-}
-
-// TODO
-func (p Product) CalculateSize() (float64, float64) {
-	return 0, 0
-}
-
 // lidded main
 func (p *Product) ProcessUserInput() {
 	var name string
@@ -46,7 +36,7 @@ func (p *Product) ProcessUserInput() {
 	fmt.Scan(&z)
 
 	var size utility.Triad
-	if x < y {
+	if x > y {
 		x, y = y, x
 	}
 	size.SetValues(x, y, z)
