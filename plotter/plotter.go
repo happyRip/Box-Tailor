@@ -1,46 +1,43 @@
 package plotter
 
 import (
-	"bufio"
-	"errors"
 	"math"
-	"os"
-	"path/filepath"
-	"regexp"
 	"strconv"
 )
 
-type pen struct {
-	X, Y int // current position
+type Pen struct {
+	x, y int // current position
 }
 
-func NewPen() pen {
-	return pen{}
+func NewPen(x, y float64) Pen {
+	p := Pen{}
+	p.SetPosition(x, y)
+	return p
 }
 
-func (p *pen) MoveAbsolute(x, y float64) string {
-	p.X = u.FloatToIntTimesTen(x)
-	p.Y = u.FloatToIntTimesTen(y)
+func (p *Pen) MoveAbsolute(x, y float64) string {
+	p.x = floatToIntTimesTen(x)
+	p.y = floatToIntTimesTen(y)
 	return ConstructCommand("PU", x, y)
 }
 
-func (p *pen) MoveRelative(x, y float64) string {
-	p.X += u.FloatToIntTimesTen(x)
-	p.Y += u.FloatToIntTimesTen(y)
+func (p *Pen) MoveRelative(x, y float64) string {
+	p.x += floatToIntTimesTen(x)
+	p.y += floatToIntTimesTen(y)
 	return ConstructCommand(
 		"PU",
-		u.IntSingleDecimalToFloat(p.X),
-		u.IntSingleDecimalToFloat(p.Y),
+		intSingleDecimalToFloat(p.x),
+		intSingleDecimalToFloat(p.y),
 	)
 }
 
-func (p *pen) Line(x, y float64) string {
-	p.X = u.FloatToIntTimesTen(x)
-	p.Y = u.FloatToIntTimesTen(y)
+func (p *Pen) Line(x, y float64) string {
+	p.x = floatToIntTimesTen(x)
+	p.y = floatToIntTimesTen(y)
 	return ConstructCommand("PD", x, y)
 }
 
-func (p *pen) DrawRectangle(width, height float64) string {
+func (p Pen) Rectangle(width, height float64) string {
 	var rect string
 	for i := 0; i < 2; i++ {
 		rect += p.Line(width, 0)
@@ -49,6 +46,27 @@ func (p *pen) DrawRectangle(width, height float64) string {
 		height *= -1
 	}
 	return rect
+}
+
+func (p *Pen) SetPosition(x, y float64) {
+	p.x = floatToIntTimesTen(x)
+	p.y = floatToIntTimesTen(y)
+}
+
+func (p *Pen) SetX(x float64) {
+	p.x = floatToIntTimesTen(x)
+}
+
+func (p *Pen) SetY(y float64) {
+	p.y = floatToIntTimesTen(y)
+}
+
+func (p Pen) X() float64 {
+	return intSingleDecimalToFloat(p.x)
+}
+
+func (p Pen) Y() float64 {
+	return intSingleDecimalToFloat(p.y)
 }
 
 func SelectPen(i int) string {
@@ -66,59 +84,4 @@ func ConstructCommand(command string, args ...float64) string {
 	}
 	command += ";\n"
 	return command
-}
-
-type floatPair struct {
-	x, y float64
-}
-
-func GetDimensionsFromFile(source string) (floatPair, error) {
-	empty := floatPair{}
-
-	if extension := filepath.Ext(source); extension != ".plt" {
-		return empty, errors.New("incorrect file type")
-	}
-
-	file, err := os.Open(source)
-	if err != nil {
-		return empty, err
-	}
-
-	x, y := extremes{}, extremes{}
-	x.init()
-	y.init()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line[:2] == "PD" {
-			stringSlice := getNumbers(scanner.Text())
-
-			for i, v := range stringSlice {
-				v, err := strconv.Atoi(v)
-				if err != nil {
-					return empty, err
-				}
-
-				switch i % 2 {
-				case 0:
-					x.getExtremes(v)
-				case 1:
-					y.getExtremes(v)
-				}
-
-			}
-		}
-	}
-
-	dimensions := floatPair{
-		x: float64(x.max-x.min) / u.UNIT,
-		y: float64(y.max-y.min) / u.UNIT,
-	}
-
-	err = file.Close()
-	if err != nil {
-		return empty, err
-	}
-	return dimensions, nil
 }

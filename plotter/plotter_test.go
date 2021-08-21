@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"testing"
 	"time"
-
-	u "github.com/happyRip/Box-Tailor/plotter/utility"
 )
 
 func TestConstructCommand(t *testing.T) {
@@ -21,10 +19,10 @@ func TestConstructCommand(t *testing.T) {
 
 	want := fmt.Sprintf("%s:%s,%s;\n",
 		command,
-		strconv.FormatFloat(math.Round(x*u.UNIT), 'f', -1, 64),
-		strconv.FormatFloat(math.Round(y*u.UNIT), 'f', -1, 64),
+		strconv.FormatFloat(math.Round(x*UNIT), 'f', -1, 64),
+		strconv.FormatFloat(math.Round(y*UNIT), 'f', -1, 64),
 	)
-	got := ConstructCommand(command, x*u.UNIT, y*u.UNIT)
+	got := ConstructCommand(command, x*UNIT, y*UNIT)
 
 	if got != want {
 		t.Errorf("input: (%f, %f)\ngot: %q,\nwanted: %q\n",
