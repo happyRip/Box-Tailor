@@ -46,7 +46,7 @@ func (b Box) Draw() []string {
 
 	//draw fold lines
 	out = append(out,
-		plotter.SelectPen(2),
+		plotter.SelectPen(3),
 		pen.MoveRelative(z+0.5*thk, -(z+0.5*thk)),
 		pen.DrawRectangle(x+thk, -(y+thk)),
 		pen.MoveAbsolute(b.Origin.X, -(z+thk)),

@@ -30,7 +30,7 @@ func main() {
 		Content: box.Product{
 			Size: utility.Triad{
 				X: p.Size.X + 2*(BOARD_THICKNESS+1),
-				Y: p.Size.Y + 2*(BOARD_THICKNESS+1),
+				Y: p.Size.Y + 2*(BOARD_THICKNESS+1) + BOARD_THICKNESS,
 				Z: p.Size.Z,
 			},
 		},
