@@ -14,6 +14,8 @@ import (
 
 const unit = 40 // 40 points per mm
 
+var textTerminator = ""
+
 type Pen struct {
 	x, y int // current position
 }
@@ -92,10 +94,34 @@ func SelectPen(i int) string {
 	return ConstructCommand("SP", float64(i))
 }
 
+func Label(s string) string {
+	return "LB" + s + textTerminator + "\n"
+}
+
+func CharacterSize(x, y float64) string {
+	return ConstructCommand("SI", x, y)
+}
+
+func DefineTerminator(r rune) string {
+	textTerminator = string(r)
+	return StringCommand("DT", textTerminator)
+}
+
 func ConstructCommand(command string, args ...float64) string {
 	for i, f := range args {
 		r := math.Round(f)
 		command += strconv.FormatFloat(r, 'f', -1, 64)
+		if i < len(args)-1 {
+			command += ","
+		}
+	}
+	command += ";\n"
+	return command
+}
+
+func StringCommand(command string, args ...string) string {
+	for i, s := range args {
+		command += s
 		if i < len(args)-1 {
 			command += ","
 		}
@@ -192,9 +218,19 @@ func (p pltFile) Initialize() error {
 	return err
 }
 
-func (p pltFile) WriteString(s string) error {
-	_, err := p.Pointer.WriteString(s)
-	return err
+// func (p pltFile) WriteString(s string) error {
+// 	_, err := p.Pointer.WriteString(s)
+// 	return err
+// }
+
+func (p pltFile) WriteString(args ...string) error {
+	for _, s := range args {
+		_, err := p.Pointer.WriteString(s)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (p pltFile) WriteContent() error {

@@ -15,6 +15,7 @@ const (
 	BOARD_THICKNESS = 6
 	// BOTTOM_BOX_STR  = "_0" // denko
 	// TOP_BOX_STR     = "_1" // wieczko
+	KERF = 2
 )
 
 func main() {
@@ -24,6 +25,11 @@ func main() {
 	bottom := lidded.Box{
 		Content:        p,
 		BoardThickness: BOARD_THICKNESS,
+		Kerf:           KERF,
+		Origin: utility.Pair{
+			X: 0,
+			Y: -12,
+		},
 	}
 	origin, _ := bottom.CalculateSize()
 	lid := lidded.Box{
@@ -36,9 +42,10 @@ func main() {
 		},
 		Origin: utility.Pair{
 			X: origin + 5,
-			Y: 0,
+			Y: -12,
 		},
 		BoardThickness: BOARD_THICKNESS,
+		Kerf:           KERF,
 	}
 
 	outAbs, err := drawToSingleFile(
@@ -54,25 +61,25 @@ func main() {
 	fmt.Println(outAbs)
 }
 
-func drawBox(name string, draft box.Drafter) (string, error) {
-	outputFile, err := plotter.NewPltFile(name, "", "")
-	if err != nil {
-		return "", err
-	}
-	outputFile.Initialize()
+// func drawBox(name string, draft box.Drafter) (string, error) {
+// 	outputFile, err := plotter.NewPltFile(name, "", "")
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	outputFile.Initialize()
 
-	for _, s := range draft.Draw() {
-		outputFile.WriteString(s)
-	}
+// 	for _, s := range draft.Draw() {
+// 		outputFile.WriteString(s)
+// 	}
 
-	outputAbs, err := filepath.Abs(outputFile.Pointer.Name())
-	if err != nil {
-		return "", err
-	}
+// 	outputAbs, err := filepath.Abs(outputFile.Pointer.Name())
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	err = outputFile.Close()
-	return outputAbs, err
-}
+// 	err = outputFile.Close()
+// 	return outputAbs, err
+// }
 
 func drawToSingleFile(name string, bottom box.Drafter, lid box.Drafter) (string, error) {
 	outputFile, err := plotter.NewPltFile(name, "", "")
@@ -80,6 +87,13 @@ func drawToSingleFile(name string, bottom box.Drafter, lid box.Drafter) (string,
 		return "", err
 	}
 	outputFile.Initialize()
+
+	outputFile.WriteString(
+		plotter.SelectPen(5),
+		plotter.DefineTerminator('$'),
+		plotter.CharacterSize(0.75, 1.5),
+		plotter.Label(name),
+	)
 
 	for _, s := range bottom.Draw() {
 		outputFile.WriteString(s)
