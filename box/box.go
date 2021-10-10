@@ -26,14 +26,18 @@ func (p *Product) ProcessUserInput() {
 	var name string
 	fmt.Print("Podaj nazwę pliku wyjściowego: ")
 	fmt.Scanln(&name)
-	fmt.Print("Podaj wymiary zawartości pudełka:\n      długość (x) [mm]: ")
-
+	fmt.Print("Podaj wymiary zawartości pudełka:\n      długość (x) [cm]: ")
 	var x, y, z float64
 	fmt.Scan(&x)
-	fmt.Print("    szerokość (y) [mm]: ")
+	fmt.Print("    szerokość (y) [cm]: ")
 	fmt.Scan(&y)
-	fmt.Print("     wysokość (z) [mm]: ")
+	fmt.Print("     wysokość (z) [cm]: ")
 	fmt.Scan(&z)
+    x, y, z = 10*x, 10*y, 10*z
+    fmt.Print("Podaj wartość luzu [cm]: ")
+    var b float64
+    fmt.Scan(&b)
+    x, y, z = x+b, y+b, z+b
 
 	var size utility.Triad
 	if x > y {

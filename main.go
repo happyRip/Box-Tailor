@@ -90,7 +90,7 @@ func drawToSingleFile(name string, bottom box.Drafter, lid box.Drafter) (string,
 
 	outputFile.WriteString(
 		plotter.SelectPen(5),
-		plotter.DefineTerminator('$'),
+		plotter.DefineTerminator(';'),
 		plotter.CharacterSize(0.75, 1.5),
 		plotter.Label(name),
 	)
