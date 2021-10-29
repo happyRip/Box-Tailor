@@ -13,9 +13,7 @@ import (
 
 const (
 	BOARD_THICKNESS = 6
-	// BOTTOM_BOX_STR  = "_0" // denko
-	// TOP_BOX_STR     = "_1" // wieczko
-	KERF = 2
+	KERF            = 2
 )
 
 func main() {
@@ -61,26 +59,6 @@ func main() {
 	fmt.Println(outAbs)
 }
 
-// func drawBox(name string, draft box.Drafter) (string, error) {
-// 	outputFile, err := plotter.NewPltFile(name, "", "")
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	outputFile.Initialize()
-
-// 	for _, s := range draft.Draw() {
-// 		outputFile.WriteString(s)
-// 	}
-
-// 	outputAbs, err := filepath.Abs(outputFile.Pointer.Name())
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	err = outputFile.Close()
-// 	return outputAbs, err
-// }
-
 func drawToSingleFile(name string, bottom box.Drafter, lid box.Drafter) (string, error) {
 	outputFile, err := plotter.NewPltFile(name, "", "")
 	if err != nil {
@@ -90,7 +68,7 @@ func drawToSingleFile(name string, bottom box.Drafter, lid box.Drafter) (string,
 
 	outputFile.WriteString(
 		plotter.SelectPen(5),
-		plotter.DefineTerminator(';'),
+		plotter.DefineTerminator('$'),
 		plotter.CharacterSize(0.75, 1.5),
 		plotter.Label(name),
 	)
