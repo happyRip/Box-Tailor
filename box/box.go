@@ -35,14 +35,12 @@ func (p *Product) ProcessUserInput() {
 	fmt.Scan(&z)
 	x, y, z = 10*x, 10*y, 10*z
 	fmt.Print("Podaj wartość luzu:\n      długość (x) [cm]: ")
-	var a, b, c float64
+	var a, b float64
 	fmt.Scan(&a)
 	fmt.Print("    szerokość (y) [cm]: ")
 	fmt.Scan(&b)
-	fmt.Print("     wysokość (z) [cm]: ")
-	fmt.Scan(&c)
-	a, b, c = 10*a, 10*b, 10*c
-	x, y, z = x+a, y+b, z+c
+	a, b = 10*a, 10*b
+	x, y = x+a, y+b
 
 	var size utility.Triad
 	if x > y {

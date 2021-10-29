@@ -20,11 +20,12 @@ func (b Box) Draw() []string {
 	o := b.Kerf
 	var pen plotter.Pen
 
-	sep, diff := t/2-2*o, 0.
-	if sep < 0 {
-		diff = -sep / 2
-		sep = 0
-	}
+	add := 4.
+	sep, diff := add+t/2-2*o, 0.
+	// if sep < 0 {
+	// 	diff = -sep / 2
+	// 	sep = 0
+	// }
 
 	// draw cut lines
 	out := []string{plotter.SelectPen(1)}
@@ -35,15 +36,15 @@ func (b Box) Draw() []string {
 		out = append(out,
 			pen.LineShape(
 				[][2]float64{
-					{0, -(y + 2*(z+t+o))},
+					{0, -(y + 2*(z+1.5*t+o))},
 					{z + 2*o - diff, 0},
-					{0, z + 0.5*t},
+					{0, z + t},
 					{sep, 0},
-					{0, -(z + 0.5*t)},
+					{0, -(z + t)},
 					{x + 2*o - 2*diff, 0},
-					{0, z + 0.5*t},
+					{0, z + t},
 					{sep, 0},
-					{0, -(z + 0.5*t)},
+					{0, -(z + t)},
 					{z + 2*o - diff, 0},
 				}...,
 			)...,
@@ -53,43 +54,45 @@ func (b Box) Draw() []string {
 		sep, diff = -sep, -diff
 	}
 
-	// // debug shape without offset
+	// debug shape without offset
 	out = append(out,
 		plotter.SelectPen(5),
 		pen.MoveAbsolute(b.Origin.X+o, b.Origin.Y-o),
 	)
+	sep = add + t/2
 	for i := 0; i < 2; i++ {
 		out = append(out,
 			pen.LineShape(
 				[][2]float64{
-					{0, -(y + 2*(z+t))},
+					{0, -(y + 2*(z+1.5*t))},
 					{z, 0},
-					{0, z + 0.5*t},
-					{0.5 * t, 0},
-					{0, -(z + 0.5*t)},
+					{0, z + t},
+					{sep, 0},
+					{0, -(z + t)},
 					{x, 0},
-					{0, z + 0.5*t},
-					{0.5 * t, 0},
-					{0, -(z + 0.5*t)},
+					{0, z + t},
+					{sep, 0},
+					{0, -(z + t)},
 					{z, 0},
 				}...,
 			)...,
 		)
 		x, y, z = -x, -y, -z
 		t, o = -t, -o
+		sep = -sep
 	}
 
 	//draw fold lines
+	sep = add + t/2
 	out = append(out,
 		plotter.SelectPen(3),
-		pen.MoveRelative(z+0.5*t, -(z+0.5*t)),
-		pen.DrawRectangle(x, -(y+t)),
-		pen.MoveRelative(-(z+0.5*t), 0),
-		// pen.MoveAbsolute(b.Origin.X+o, b.Origin.Y-(z+0.5*t-o)),
+		pen.MoveRelative(z+sep+o, -(z+0.5*t)-o),
+		pen.DrawRectangle(x, -(y+2*t)),
+		pen.MoveRelative(-(z+sep), -0.5*t),
 		pen.Line(z, 0),
 		pen.MoveRelative(-z, -(y+t)),
 		pen.Line(z, 0),
-		pen.MoveRelative(x+t, 0),
+		pen.MoveRelative(x+2*sep, 0),
 		pen.Line(z, 0),
 		pen.MoveRelative(-z, y+t),
 		pen.Line(z, 0),
