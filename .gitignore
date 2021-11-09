@@ -22,3 +22,7 @@
 
 # other files
 *.plt
+
+# development folders
+/bin
+/tmp
