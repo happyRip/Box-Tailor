@@ -1,0 +1,11 @@
+NAME = box-tailor
+GOOS = linux
+
+run:
+	go run .
+dev:
+	$(eval NAME = $(NAME)_debug)
+windows:
+	$(eval GOOS = windows)
+binary:
+	GOOS=$(GOOS) go build -o ./tmp/$(NAME).exe .
