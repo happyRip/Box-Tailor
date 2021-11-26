@@ -15,20 +15,39 @@ type Box struct {
 }
 
 func (b Box) Draw() []string {
+	// draw cut lines
+	cuts := []string{plotter.SelectPen(1)}
+	cuts = append(cuts,
+		b.drawCutLines()...,
+	)
+
+	//draw fold lines
+	folds := []string{plotter.SelectPen(3)}
+	folds = append(folds,
+		b.drawFoldLines()...,
+	)
+
+	shape := []string{plotter.SelectPen(5)}
+	shape = append(shape,
+		b.drawNoOffset()...,
+	)
+	cuts = append(cuts, shape...)
+
+	return append(cuts, folds...)
+}
+
+func (b Box) drawCutLines() []string {
 	x, y, z := b.InternalSize()
 	t := b.BoardThickness
 	o := b.Kerf
-	var pen plotter.Pen
 
 	add := 4.
 	sep, diff := add+t/2-2*o, 0.
-	// if sep < 0 {
-	// 	diff = -sep / 2
-	// 	sep = 0
-	// }
 
-	// draw cut lines
-	out := []string{plotter.SelectPen(1)}
+	var (
+		pen plotter.Pen
+		out []string
+	)
 	if b.Origin.X != 0 || b.Origin.Y != 0 {
 		out = append(out, pen.MoveAbsolute(b.Origin.X, b.Origin.Y))
 	}
@@ -36,16 +55,16 @@ func (b Box) Draw() []string {
 		out = append(out,
 			pen.LineShape(
 				[][2]float64{
-					{0, -(y + 2*(z+1.5*t+o))},
-					{z + 2*o - diff, 0},
-					{0, z + t},
+					{0, -(y + 2*(z+2*t+o))},
+					{z + 2*o - diff - t/2, 0},
+					{0, z + 1.5*t},
 					{sep, 0},
-					{0, -(z + t)},
+					{0, -(z + 1.5*t)},
 					{x + 2*o - 2*diff, 0},
-					{0, z + t},
+					{0, z + 1.5*t},
 					{sep, 0},
-					{0, -(z + t)},
-					{z + 2*o - diff, 0},
+					{0, -(z + 1.5*t)},
+					{z + 2*o - diff - t/2, 0},
 				}...,
 			)...,
 		)
@@ -54,49 +73,79 @@ func (b Box) Draw() []string {
 		sep, diff = -sep, -diff
 	}
 
-	// debug shape without offset
-	out = append(out,
-		plotter.SelectPen(5),
-		pen.MoveAbsolute(b.Origin.X+o, b.Origin.Y-o),
+	return out
+}
+
+func (b Box) drawFoldLines() []string {
+	x, y, z := b.InternalSize()
+	t := b.BoardThickness
+	o := b.Kerf
+
+	add := 4.
+	sep := add + t/2
+
+	var (
+		pen plotter.Pen
+		out []string
 	)
-	sep = add + t/2
+	if b.Origin.X != 0 || b.Origin.Y != 0 {
+		out = append(out, pen.MoveAbsolute(b.Origin.X, b.Origin.Y))
+	}
+	out = append(out,
+		pen.MoveRelative(z+sep+o-t, -(z+t/2)-o),
+		pen.DrawRectangle(x+t, -(y+3*t)),
+		pen.MoveRelative(-z-0.25*sep, -t),
+		pen.Line(z, 0),
+		pen.MoveRelative(-z, -(y+t)),
+		pen.Line(z, 0),
+		pen.MoveRelative(x+2*sep+t, 0),
+		pen.Line(z, 0),
+		pen.MoveRelative(-z, y+t),
+		pen.Line(z, 0),
+	)
+	return out
+}
+
+func (b Box) drawNoOffset() []string {
+	x, y, z := b.InternalSize()
+	t := b.BoardThickness
+	o := b.Kerf
+
+	add := 4.
+	sep, diff := add + t/2, 0.
+
+	var (
+		pen plotter.Pen
+		out []string
+	)
+	if b.Origin.X != 0 || b.Origin.Y != 0 {
+		out = append(out, pen.MoveAbsolute(b.Origin.X, b.Origin.Y))
+	}
+	out = append(out,
+		pen.MoveRelative(o, -o),
+	)
+	o = 0.
 	for i := 0; i < 2; i++ {
 		out = append(out,
 			pen.LineShape(
 				[][2]float64{
-					{0, -(y + 2*(z+1.5*t))},
-					{z, 0},
-					{0, z + t},
+					{0, -(y + 2*(z + 2*t))},
+					{z + 2*o - diff - t/2, 0},
+					{0, z + 1.5*t},
 					{sep, 0},
-					{0, -(z + t)},
-					{x, 0},
-					{0, z + t},
+					{0, -(z + 1.5*t)},
+					{x + 2*o - 2*diff, 0},
+					{0, z + 1.5*t},
 					{sep, 0},
-					{0, -(z + t)},
-					{z, 0},
+					{0, -(z + 1.5*t)},
+					{z + 2*o - diff - t/2, 0},
 				}...,
 			)...,
 		)
 		x, y, z = -x, -y, -z
 		t, o = -t, -o
-		sep = -sep
+		sep, diff = -sep, -diff
 	}
-
-	//draw fold lines
-	sep = add + t/2
-	out = append(out,
-		plotter.SelectPen(3),
-		pen.MoveRelative(z+sep+o, -(z+0.5*t)-o),
-		pen.DrawRectangle(x, -(y+2*t)),
-		pen.MoveRelative(-(z+sep), -0.5*t),
-		pen.Line(z, 0),
-		pen.MoveRelative(-z, -(y+t)),
-		pen.Line(z, 0),
-		pen.MoveRelative(x+2*sep, 0),
-		pen.Line(z, 0),
-		pen.MoveRelative(-z, y+t),
-		pen.Line(z, 0),
-	)
 
 	return out
 }

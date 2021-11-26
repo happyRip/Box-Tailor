@@ -8,4 +8,4 @@ dev:
 windows:
 	$(eval GOOS = windows)
 binary:
-	GOOS=$(GOOS) go build -o ./tmp/$(NAME).exe .
+	GOOS=$(GOOS) go build -o ./bin/$(NAME).exe .
