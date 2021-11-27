@@ -9,3 +9,5 @@ windows:
 	$(eval GOOS = windows)
 binary:
 	GOOS=$(GOOS) go build -o ./bin/$(NAME).exe .
+test:
+	go run . -o tmp/test -d 100,50,25
