@@ -103,6 +103,7 @@ func (b Box) drawFoldLines() []string {
 		pen.MoveRelative(x+2*t, 0),
 		pen.Line(z, 0),
 		pen.MoveRelative(-z, -(y+t)),
+		pen.Line(z, 0),
 	)
 	return out
 }
